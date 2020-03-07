@@ -67,17 +67,18 @@ else:
 # sampleSize = 800
 #End toy code
 
+#TODO: test code Logan
+x = np.loadtxt('datasets/finalProcessed/normalizeXAbs.txt',  delimiter=',')
+y = np.loadtxt('datasets/finalProcessed/processedY.txt',  delimiter=',')
+sampleSize = 400
+#TODO: test code Logan
+
 maxSize = np.size(y)
 y = y.astype(int)
 
 
 x2 = x[0:maxSize,0:sampleSize]
 
-
-ignoringClasses = np.where(y >= 8)
-restOfClassLocation = [i for i in range(maxSize) if i not in ignoringClasses[0]]
-y = y[restOfClassLocation]
-x2 = x2[restOfClassLocation]
 
 maxSize = np.size(y)
 
@@ -91,7 +92,7 @@ x2 = x2[restOfClassLocation]
 # size = 1190
 maxSize = np.size(y)  # 1178
 
-percentTrain = 0.5
+percentTrain = 0.8
 trainSize = round(percentTrain * maxSize)
 avgAccuracy = 0
 
