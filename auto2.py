@@ -6,7 +6,7 @@ import numpy as np
 # use Matplotlib (don't ask)
 import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
-
+import plot3d
 
 def unison_shuffled_copies(a, b):
     assert len(a) == len(b)
@@ -14,7 +14,7 @@ def unison_shuffled_copies(a, b):
     return a[p], b[p]
 
 startAt = 0
-sampleSize = 800
+sampleSize = 400
 startShape = sampleSize - startAt
 
 
@@ -23,7 +23,7 @@ secondLayer = 200
 thirdLayer = 50
 fourthLayer = 10
 # fifthLayer = 10
-middleLayer = 2
+middleLayer = 3
 # this is our input placeholder
 input_img = Input(shape=(startShape,))
 regularizerValue = 10e-6
@@ -31,7 +31,7 @@ regularizerValue = 10e-6
 activationNames = ["softmax", "elu", "selu", "softplus", "softsign", "relu", "tanh", "sigmoid", "hard_sigmoid", "exponential", "linear"]
 ind = 10
 activationFunction = activationNames[10]
-decodedActivation = activationNames[7]
+decodedActivation = activationNames[6]
 outerActivation = activationNames[5]
 innerActivation = activationNames[10]
 
@@ -86,7 +86,7 @@ decoder_layer = autoencoder.layers[-1]
 # autoencoder.compile(optimizer='adadelta', loss='mean_squared_error') #0.008
 # autoencoder.compile(optimizer='adadelta', loss='mean_absolute_error') #0.006
 # autoencoder.compile(optimizer='adadelta', loss='mean_absolute_percentage_error') #0.36
-# autoencoder.compile(optimizer='adadelta', loss='mean_squared_logarithmic_error') #0.0043
+autoencoder.compile(optimizer='adadelta', loss='mean_squared_logarithmic_error') #0.0043
 # autoencoder.compile(optimizer='adadelta', loss='squared_hinge') #0.59
 # autoencoder.compile(optimizer='adadelta', loss='hinge') #0.73
 # autoencoder.compile(optimizer='adadelta', loss='categorical_hinge') #0.0013 ****
@@ -96,7 +96,7 @@ decoder_layer = autoencoder.layers[-1]
 # autoencoder.compile(optimizer='RMSprop', loss='mean_squared_logarithmic_error') #0.0031
 # autoencoder.compile(optimizer='Adagrad', loss='mean_squared_logarithmic_error') #0.0027
 # autoencoder.compile(optimizer='Adam', loss='mean_squared_logarithmic_error') #0.0028
-autoencoder.compile(optimizer='Adamax', loss='mean_squared_logarithmic_error') #0.0015* 2.1848e-04
+# autoencoder.compile(optimizer='Adamax', loss='mean_squared_logarithmic_error') #0.0015* 2.1848e-04
 # autoencoder.compile(optimizer='Nadam', loss='mean_squared_logarithmic_error') #0.0014
 
 
@@ -110,6 +110,12 @@ x2 = np.loadtxt("WiFiData1400ComplexFFT.txt")
 x = np.ones((np.shape(x1)[0], 800))
 x[:, 0:800:2] = x1
 x[:, 1:800:2] = x2
+
+#TODO: test code Logan
+x = np.loadtxt('datasets/finalProcessed/normalizeXAbs.txt',  delimiter=',')
+y = np.loadtxt('datasets/finalProcessed/processedY.txt',  delimiter=',')
+sampleSize = 400
+#TODO: test code Logan
 
 #Begin Toy dataset
 # x = np.loadtxt('toyX',  delimiter=',')
@@ -150,7 +156,7 @@ print(np.shape(xTrain))
 # print(x_test.shape)
 
 autoencoder.fit(xTrain, xTrain,
-                epochs=20,
+                epochs=30,
                 batch_size=10,
                 shuffle=True,
                 validation_data=(xTest, xTest))
@@ -163,22 +169,29 @@ encoded_imgs = encoder.predict(xTest)
 encoded_imgs_train = encoder.predict(xTrain)
 encoded_imgs2 = autoencoder.predict(xTest)
 n=100
-plt.plot(xTest[n,:],  'r-')
-plt.plot(encoded_imgs2[n,:],  'b-')
-plt.show()
+# plt.plot(xTest[n,:],  'r-')
+# plt.plot(encoded_imgs2[n,:],  'b-')
+# plt.show()
+
+np.savetxt('datasets/temp/encodedImgs', encoded_imgs, delimiter=',')
+np.savetxt('datasets/temp/encodedImgsTrain', encoded_imgs_train, delimiter=',')
+np.savetxt('datasets/temp/labels', yTest, delimiter=',')
 
 clustering = DBSCAN(eps = 1.00, min_samples=4).fit(encoded_imgs_train)
 for one, two in zip(yTrain, clustering.labels_):
     print("yTest: ", one, " | DBSCAN: ", two)
 
-for i in range(nClasses):
-    classLocation = np.argwhere(yTest == i)
-    plt.plot(encoded_imgs[classLocation, 0], encoded_imgs[classLocation, 1],  colors[i]+'s')
-plt.show()
-for i in range(nClasses):
-    classLocation = np.argwhere(yTrain == i)
-    plt.plot(encoded_imgs_train[classLocation, 0], encoded_imgs_train[classLocation, 1],  colors[i]+'s')
-plt.show()
+plot3d.plot3D(encoded_imgs, yTest)
+plot3d.plot3D(encoded_imgs_train, yTrain)
+
+# for i in range(nClasses):
+#     classLocation = np.argwhere(yTest == i)
+#     plt.plot(encoded_imgs[classLocation, 0], encoded_imgs[classLocation, 1],  colors[i]+'s')
+# plt.show()
+# for i in range(nClasses):
+#     classLocation = np.argwhere(yTrain == i)
+#     plt.plot(encoded_imgs_train[classLocation, 0], encoded_imgs_train[classLocation, 1],  colors[i]+'s')
+# plt.show()
 
 
 # decoded_imgs = decoder.predict(encoded_imgs)

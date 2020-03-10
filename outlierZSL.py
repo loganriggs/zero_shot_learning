@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+import plot3d
+import dbscan
 
 xTrainAvg = np.loadtxt('zeroShotDataSet/xTrainAvg',  delimiter=',')
 xTrainVar = np.loadtxt('zeroShotDataSet/xTrainVar', delimiter=',')
@@ -34,63 +35,67 @@ print(np.shape(xUnknownClassPredict))
 yTest2 = [np.argmax(y, axis=None, out=None) for y in yTest]
 
 
-print(np.shape(yTest2))
-minClass = min(yTest2)
-numClasses = int(max(yTest2) - minClass)
-confusionMatrix = np.zeros((numClasses+1, numClasses+1))
-outliersError = 0
-overClassError = 0
-print(np.bincount(yTest2))
-clustering = DBSCAN(eps = 0.6, min_samples=5).fit(xTestPredict)
-for one, two in zip(yTest2, clustering.labels_):
-    if (two <= numClasses and two != -1):
-        confusionMatrix[int(one - minClass), two] += 1
-    elif (two == -1):
-        outliersError += 1
-    else:
-        overClassError += 1
-    # print("yTest: ", one, " | DBSCAN: ", two)
+dbscan.dbscan(xTestPredict, yTest2, 0.6, 5)
+# print(np.shape(yTest2))
+# minClass = min(yTest2)
+# numClasses = int(max(yTest2) - minClass)
+# confusionMatrix = np.zeros((numClasses+1, numClasses+1))
+# outliersError = 0
+# overClassError = 0
+# print(np.bincount(yTest2))
+# clustering = DBSCAN(eps = 0.6, min_samples=5).fit(xTestPredict)
+# for one, two in zip(yTest2, clustering.labels_):
+#     if (two <= numClasses and two != -1):
+#         confusionMatrix[int(one - minClass), two] += 1
+#     elif (two == -1):
+#         outliersError += 1
+#     else:
+#         overClassError += 1
+#     # print("yTest: ", one, " | DBSCAN: ", two)
+#
+# print("Confusion Matrix. Correct class is the greatest in a row")
+# print(confusionMatrix)
+# print("Outliers Error: ", outliersError)
+# print("OverClass Error: ", overClassError)
+#
+# #UNKNOWN Classes
+# minClass = min(yUnknownClass)
+# numUnknownClasses = int(max(yUnknownClass) - minClass)
+# confusionMatrix = np.zeros((numUnknownClasses+1, numUnknownClasses+1))
+# outliersError = 0
+# overClassError = 0
+# print(np.bincount(yUnknownClass.astype(int)))
+# print("classes: ", numUnknownClasses)
 
-print("Confusion Matrix. Correct class is the greatest in a row")
-print(confusionMatrix)
-print("Outliers Error: ", outliersError)
-print("OverClass Error: ", overClassError)
 
-#UNKNOWN Classes
-minClass = min(yUnknownClass)
-numUnknownClasses = int(max(yUnknownClass) - minClass)
-confusionMatrix = np.zeros((numUnknownClasses+1, numUnknownClasses+1))
-outliersError = 0
-overClassError = 0
-print(np.bincount(yUnknownClass.astype(int)))
-print("classes: ", numUnknownClasses)
+# plot3d.plot3D(xPCA,yUnknownClass)
+# #PLOT Plot
+# fig = plt.figure()
+# ax = plt.axes(projection='3d')
+# yPlot = np.array(yTest2)
+# colors = ["r", "b", "y", "c", "m"]
+# # for i in range(numClasses+1):
+# for i in range(numUnknownClasses+1):
+#     classLocation = np.argwhere(yUnknownClass == i+minClass)
+#     # classLocation = np.argwhere(yPlot == i)
+#     # plt.plot(xPCA[classLocation, 0], xPCA[classLocation, 1],  colors[i]+'s') #2D
+#     ax.scatter3D(xPCA[classLocation, 0], xPCA[classLocation, 1], xPCA[classLocation, 2], colors[i]+'s') #3D
+# plt.show()
 
-#PLOT Plot
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-yPlot = np.array(yTest2)
-colors = ["r", "b", "y", "c", "m"]
-# for i in range(numClasses+1):
-for i in range(numUnknownClasses+1):
-    classLocation = np.argwhere(yUnknownClass == i+minClass)
-    # classLocation = np.argwhere(yPlot == i)
-    # plt.plot(xPCA[classLocation, 0], xPCA[classLocation, 1],  colors[i]+'s') #2D
-    ax.scatter3D(xPCA[classLocation, 0], xPCA[classLocation, 1], xPCA[classLocation, 2], colors[i]+'s') #3D
-plt.show()
 
-clustering = DBSCAN(eps=0.08, min_samples=8).fit(xPCA)
-for one, two in zip(yUnknownClass, clustering.labels_):
-    if(two <= numUnknownClasses and two!= -1):
-        confusionMatrix[int(one-minClass),two] +=1
-    elif(two == -1):
-        outliersError +=1
-    else:
-        overClassError +=1
-    # print("yUnknown: ", one, " | DBSCAN: ", two)
-print("Confusion Matrix. Correct class is the greatest in a row")
-print(confusionMatrix)
-print("Outliers Error: ", outliersError)
-print("OverClass Error: ", overClassError)
+# clustering = DBSCAN(eps=0.08, min_samples=8).fit(xPCA)
+# for one, two in zip(yUnknownClass, clustering.labels_):
+#     if(two <= numUnknownClasses and two!= -1):
+#         confusionMatrix[int(one-minClass),two] +=1
+#     elif(two == -1):
+#         outliersError +=1
+#     else:
+#         overClassError +=1
+#     # print("yUnknown: ", one, " | DBSCAN: ", two)
+# print("Confusion Matrix. Correct class is the greatest in a row")
+# print(confusionMatrix)
+# print("Outliers Error: ", outliersError)
+# print("OverClass Error: ", overClassError)
 
 
 # #forLoop
